@@ -1,0 +1,47 @@
+{% extends 'chat/layout.html' %}
+
+{% load static %}
+
+{% block body %}
+
+    <nav class="text-center">
+        <a href="{% url 'index' %}">
+            <img src="{% static 'chat/img/cs50.png' %}" class="m-3" alt="Harvard University Logo">
+        </a>
+    </nav>
+
+    <div class="box">
+        <h4 class="brand">Harvard<span>Key</span></h4>
+        <h3>Sign Up</h3>
+
+        {% if message %}
+            <div>{{ message }}</div>
+        {% endif %}
+
+        <form action="{% url 'register' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-element">
+                <input type="text" name="username" autofocus autocomplete="off" required>
+                <label>Username</label>
+            </div>
+            <div class="form-element">
+                <input type="email" name="email" autocomplete="off" required>
+                <label>Email</label>
+            </div>
+            <div class="form-element">
+                <input type="password" name="password" required>
+                <label>Password</label>
+            </div>
+            <div class="form-element">
+                <input type="password" name="confirmation" required>
+                <label>Confirmation</label>
+            </div>
+            <input type="submit" value="Sign up" class="button">
+        </form>
+
+        <hr class="my-3">
+
+        Already have an account? <a href="{% url 'login' %}">Log In here.</a>
+    </div>
+
+{% endblock body %}

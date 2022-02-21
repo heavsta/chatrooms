@@ -1,0 +1,47 @@
+{% extends 'chat/layout.html' %}
+
+{% load static %}
+
+{% block body %}
+
+    <nav class="text-center">
+        <a href="{% url 'index' %}">
+            <img src="{% static 'chat/img/cs50.png' %}" class="m-3" alt="Harvard University Logo">
+        </a>
+    </nav>
+
+    <div class="text-center mt-3">
+        <h1>CS50: Chatrooms</h1>
+        <p>A chatroom service that lets students discuss computer science topics with each other.</p>
+    </div>
+
+    <div class="box">
+        <h4 class="brand">Harvard<span>Key</span></h4>
+        <h3>Sign In</h3>
+
+        {% if message %}
+            <div>{{ message }}</div>
+        {% endif %}
+
+        <form action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-element">
+                <input type="text" name="username" autocomplete="off" required>
+                <label>Username</label>
+            </div>
+            <div class="form-element">
+                <input type="password" name="password" required>
+                <label>Password</label>
+            </div>
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value={{ request.GET.next }}>
+            {% endif %}
+            <input type="submit" value="Login" class="button">
+        </form>
+
+        <hr class="my-4">
+
+        <p class="text">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p>
+    </div>
+
+{% endblock body %}

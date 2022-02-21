@@ -1,0 +1,131 @@
+{% extends 'chat/layout.html' %}
+
+{% load static %}
+
+{% block body %}
+<div class="app">
+  <div class="sidebar" id="sidebar">
+      <div class="text-center">
+          <a href="{% url 'index' %}">
+              <img src="{% static 'chat/img/cs50.png' %}" class="m-3" alt="Harvard University Logo">
+          </a>
+      </div>
+
+      <div class="chatrooms">
+          <h2>Chatrooms</h2>
+          {% for room in rooms %}
+            {% if forloop.first %}
+              {% if room_name == room.name %}
+              <a href="{% url 'room' room.name %}">
+                <div class="select first active">
+                        {{ room.name }}
+                </div>
+              </a>
+              {% else %}
+              <a href="{% url 'room' room.name %}">
+                <div class="select first">
+                        {{ room.name }}
+                </div>
+              </a>
+              {% endif %}
+            {% else %}
+              {% if room_name == room.name %}
+                <a href="{% url 'room' room.name %}">
+                  <div class="select active">
+                          {{ room.name }}
+                  </div>
+                </a>
+              {% else %}
+                <a href="{% url 'room' room.name %}">
+                  <div class="select">
+                          {{ room.name }}
+                  </div>
+                </a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+      </div>
+      <div id="logout">
+        <a href="{% url 'logout' %}">Logout</a>
+      </div>
+      <i class="fas fa-user-cog fa-lg" id="cog"></i>
+  </div>
+
+  <div class="room">
+    <i class="fas fa-bars fa-2x" id="burger"></i>
+    <h1 class="text-center mt-2">{{ room.fullName }}</h1>
+    <div class="container">
+      <div class="row d-flex justify-content-center">
+        <div class="col-sm-12 col-lg-10">
+            <label class="h4 pt-5">Chatroom</label>
+            <div id="chat-text" class="form-control" rows="10"></div>
+            <br />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input">
+      <form>
+          <input id="input" type="text" autofocus autocomplete="off" placeholder="Send a message..." />
+          <button id="submit" type="button"><i class="fas fa-paper-plane"></i></button>
+      </form>
+  </div>
+</div>
+  
+{% endblock body %}
+
+{% block javascripts %}
+  {{room_name|json_script:'room-name'}}
+  {{request.user.username|json_script:'user_username'}}
+
+  <script>
+
+    const user_username = JSON.parse(
+      document.getElementById('user_username').textContent
+    )
+
+    document.querySelector('#submit').onclick = function (e) {
+      const messageInputDom = document.querySelector('#input')
+      const message = messageInputDom.value
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+          username: user_username
+        })
+      )
+      messageInputDom.value = ''
+    }
+
+    document.querySelector('form').onsubmit = (e) => {
+      e.preventDefault()
+      const messageInputDom = document.querySelector('#input')
+      const message = messageInputDom.value
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+          username: user_username
+        })
+      )
+      messageInputDom.value = ''
+    }
+
+    const roomName = JSON.parse(
+      document.getElementById('room-name').textContent
+    )
+
+    // Configuring WebSocket
+    const chatSocket = new WebSocket(
+      'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+    )
+
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data)
+      console.log(data)
+      firstLetter = data.username.slice(0, -(data.username.length) + 1).toUpperCase()
+      console.log(firstLetter)
+      document.querySelector('#chat-text').innerHTML += `<div class="msg"><span class="initials">${firstLetter}</span><span class="username">${data.username}:</span> ${data.message}</div>`
+      document.querySelector('#chat-text').scrollTop = document.querySelector('#chat-text').scrollHeight
+    }
+  </script>
+{% endblock javascripts %}
